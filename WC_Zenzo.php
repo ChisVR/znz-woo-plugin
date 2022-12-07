@@ -20,11 +20,11 @@ if (class_exists('WC_Payment_Gateway')) {
             $this->max_time_limit = $this->get_option('max_time_limit');
             $this->cryptocurrency_used = "ZNZ";
             $this->default_currency_used = get_woocommerce_currency();
-            $this->exchange_rate = $this->ZNZ_exchange_rate($this->default_currency_used);
+            $this->exchange_rate = $this->znz_exchange_rate($this->default_currency_used);
             $this->plugin_version = "1.0.7";
 
             // Add support for "Woocommerce subscriptions" plugin
-            $this->ZNZ_remove_filter( 'template_redirect', 'maybe_setup_cart', 100 );
+            $this->znz_remove_filter( 'template_redirect', 'maybe_setup_cart', 100 );
             $this->supports = array(
                'products',
                'subscriptions',
@@ -130,7 +130,7 @@ if (class_exists('WC_Payment_Gateway')) {
 
 
         // Exchange rate in the default store currency
-        public function ZNZ_exchange_rate($default_currency) {
+        public function znz_exchange_rate($default_currency) {
             if ( is_checkout() ) {
     		    $response = wp_remote_get(ZNZ_API_URL."?rate=".strtolower(esc_html($default_currency)));
                 $price = json_decode($response["body"]);
@@ -148,7 +148,7 @@ if (class_exists('WC_Payment_Gateway')) {
 
 
         // Remove filters
-        function ZNZ_remove_filter( $hook_name = '', $method_name = '', $priority = 0 ) {
+        function znz_remove_filter( $hook_name = '', $method_name = '', $priority = 0 ) {
             global $wp_filter;
             global $wp;
 

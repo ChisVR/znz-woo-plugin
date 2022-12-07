@@ -12,7 +12,7 @@
 const ZNZ_API_URL = "https://payment-checker.chisdealhd.co.uk/ZNZ.php";
 const ZNZ_ORDERS_TABLE_NAME = "zenzo_cryptocurrency_orders";
 
-function ZNZ_create_transactions_table()
+function znz_create_transactions_table()
 {
     global $wpdb;
     $db_table_name = $wpdb->prefix . ZNZ_ORDERS_TABLE_NAME;
@@ -43,34 +43,34 @@ $active_plugins = apply_filters('active_plugins', get_option('active_plugins'));
 
 if (in_array('woocommerce/woocommerce.php', $active_plugins) || class_exists('WooCommerce')) {
 
-    register_activation_hook(__FILE__, 'ZNZ_create_transactions_table');
-    add_filter('woocommerce_payment_gateways', 'ZNZ_add_zenzo_crypto_gateway');
+    register_activation_hook(__FILE__, 'znz_create_transactions_table');
+    add_filter('woocommerce_payment_gateways', 'znz_add_zenzo_crypto_gateway');
 
-    function ZNZ_add_zenzo_crypto_gateway($gateways)
+    function znz_add_zenzo_crypto_gateway($gateways)
     {
         $gateways[] = 'WC_Zenzo';
         return $gateways;
     }
 
-    add_action('plugins_loaded', 'ZNZ_init_payment_gateway');
+    add_action('plugins_loaded', 'znz_init_payment_gateway');
 
-    function ZNZ_init_payment_gateway()
+    function znz_init_payment_gateway()
     {
         require 'WC_Zenzo.php';
     }
 } else {
-    function ZNZ_admin_notice()
+    function znz_admin_notice()
     {
-        echo "<div style='margin-left: 2px;' class='error'><p><strong>Please install WooCommerce before using zenzo Cryptocurrency Payment Gateway.</strong></p></div>";
+        echo "<div style='margin-left: 2px;' class='error'><p><strong>Please install WooCommerce before using Zenzo Cryptocurrency Payment Gateway.</strong></p></div>";
         deactivate_plugins('/woocommerce-zenzo/woocommerce-zenzo.php');
         wp_die();
     };
-    add_action('admin_notices', 'ZNZ_admin_notice');
+    add_action('admin_notices', 'znz_admin_notice');
 }
 
 
 // Add plugin scripts
-function ZNZ_load_cp_scripts()
+function znz_load_cp_scripts()
 {
     if (is_wc_endpoint_url('order-pay')) {
         wp_enqueue_style('cp-styles', plugins_url('css/cp-styles.css', __FILE__));
@@ -78,20 +78,20 @@ function ZNZ_load_cp_scripts()
     }
 }
 
-add_action('wp_enqueue_scripts', 'ZNZ_load_cp_scripts', 30);
+add_action('wp_enqueue_scripts', 'znz_load_cp_scripts', 30);
 
 
 // Processing of order
-function ZNZ_process_order($order_id)
+function znz_process_order($order_id)
 {
     global $wp;
-    $wc_ZNZ = new WC_Zenzo;
+    $wc_znz = new WC_Zenzo;
 
     $order_id = $wp->query_vars['order-pay'];
     $order = wc_get_order($order_id);
     $order_status = $order->get_status();
 
-    $order_crypto_exchange_rate = $wc_ZNZ->exchange_rate;
+    $order_crypto_exchange_rate = $wc_znz->exchange_rate;
 
     // Redirect to "cancelled" page when the order's payment is not received
     if ($order_status == 'cancelled') {
@@ -130,9 +130,9 @@ function ZNZ_process_order($order_id)
         // Record the order details for the first time
         if ($count == 0) {
 
-            $payment_address = $wc_ZNZ->payment_address;
+            $payment_address = $wc_znz->payment_address;
             $order_total = $order->get_total();
-            $order_in_crypto = ZNZ_order_total_in_crypto($order_total, $order_crypto_exchange_rate);
+            $order_in_crypto = znz_order_total_in_crypto($order_total, $order_crypto_exchange_rate);
             $order_currency = $order->get_currency();
 
             $record_new = $wpdb->insert($db_table_name, array('transaction_id' => "", 'payment_address' => $payment_address, 'order_id' => $order_id, 'order_total' => $order_total, 'order_in_crypto' => $order_in_crypto, 'order_default_currency' => $order_currency, 'order_crypto_exchange_rate' => $order_crypto_exchange_rate, 'order_status' => 'pending', 'order_time' => time()));
@@ -146,30 +146,30 @@ function ZNZ_process_order($order_id)
     }
 }
 
-add_action("before_woocommerce_pay", "ZNZ_process_order", 20);
+add_action("before_woocommerce_pay", "znz_process_order", 20);
 
 
 
 // Verification of payment
-function ZNZ_verify_payment()
+function znz_verify_payment()
 {
     global $wpdb;
     $db_table_name = $wpdb->prefix . ZNZ_ORDERS_TABLE_NAME;
 
-    $wc_ZNZ = new WC_Zenzo;
+    $wc_znz = new WC_Zenzo;
 
     $order_id = intval(sanitize_text_field($_POST['order_id']));
     $order = new WC_Order($order_id);
 
 
-    $cp_order = ZNZ_get_cp_order_info($order_id);
+    $cp_order = znz_get_cp_order_info($order_id);
     $payment_address = $cp_order->payment_address;
     $transaction_id = $cp_order->transaction_id;
     $order_in_crypto = $cp_order->order_in_crypto;
-    $confirmation_no = $wc_ZNZ->confirmation_no;
+    $confirmation_no = $wc_znz->confirmation_no;
     $order_time = $cp_order->order_time;
-    $max_time_limit = $wc_ZNZ->max_time_limit;
-    $plugin_version = $wc_ZNZ->plugin_version;
+    $max_time_limit = $wc_znz->max_time_limit;
+    $plugin_version = $wc_znz->plugin_version;
 
     if (empty($transaction_id)) {
         $transaction_id = "missing";
@@ -237,13 +237,13 @@ function ZNZ_verify_payment()
     }
 }
 
-add_action("wp_ajax_ZNZ_verify_payment", "ZNZ_verify_payment");
-add_action("wp_ajax_nopriv_ZNZ_verify_payment", "ZNZ_verify_payment");
+add_action("wp_ajax_znz_verify_payment", "znz_verify_payment");
+add_action("wp_ajax_nopriv_znz_verify_payment", "znz_verify_payment");
 
 
 
 // Get information about the recorded order
-function ZNZ_get_cp_order_info($order_id)
+function znz_get_cp_order_info($order_id)
 {
     global $wpdb;
     $db_table_name = $wpdb->prefix . ZNZ_ORDERS_TABLE_NAME;
@@ -261,13 +261,13 @@ function ZNZ_get_cp_order_info($order_id)
 
 
 // Get information about the remaining time for order
-function ZNZ_order_remaining_time($order_id)
+function znz_order_remaining_time($order_id)
 {
     global $wpdb;
     $db_table_name = $wpdb->prefix . ZNZ_ORDERS_TABLE_NAME;
 
-    $wc_ZNZ = new WC_Zenzo;
-    $max_time_limit = $wc_ZNZ->max_time_limit * 60; // In seconds
+    $wc_znz = new WC_Zenzo;
+    $max_time_limit = $wc_znz->max_time_limit * 60; // In seconds
 
     $now = new DateTime();
     $order_time = $wpdb->get_var($wpdb->prepare("SELECT order_time FROM $db_table_name WHERE order_id = %d", $order_id));
@@ -286,7 +286,7 @@ function ZNZ_order_remaining_time($order_id)
 
 
 // Create order total
-function ZNZ_order_total_in_crypto($amount, $rate)
+function znz_order_total_in_crypto($amount, $rate)
 {
     $difference = 0.00002;
 
@@ -300,8 +300,8 @@ function ZNZ_order_total_in_crypto($amount, $rate)
     }
 
     // Create unique amount for payment
-    $wc_ZNZ = new WC_Zenzo;
-    $max_time_limit = $wc_ZNZ->max_time_limit * 60;
+    $wc_znz = new WC_Zenzo;
+    $max_time_limit = $wc_znz->max_time_limit * 60;
 
     global $wpdb;
     $db_table_name = $wpdb->prefix . ZNZ_ORDERS_TABLE_NAME;
@@ -331,7 +331,7 @@ function ZNZ_order_total_in_crypto($amount, $rate)
 
 
 // Order received text
-function ZNZ_order_received_text($text, $order)
+function znz_order_received_text($text, $order)
 {
     if ($order->has_status('completed')) {
         $new = 'Thank you. Your order has been received!';
@@ -341,22 +341,22 @@ function ZNZ_order_received_text($text, $order)
     return $new;
 }
 
-add_filter('woocommerce_thankyou_order_received_text', 'ZNZ_order_received_text', 10, 2);
+add_filter('woocommerce_thankyou_order_received_text', 'znz_order_received_text', 10, 2);
 
 
 
 // Plugin directory path
-function ZNZ_plugin_path()
+function znz_plugin_path()
 {
     return untrailingslashit(plugin_dir_path(__FILE__));
 }
 
-add_filter('woocommerce_locate_template', 'ZNZ_woocommerce_locate_template', 10, 3);
+add_filter('woocommerce_locate_template', 'znz_woocommerce_locate_template', 10, 3);
 
 
 
 // Woocommerce plugin path in plugin
-function ZNZ_woocommerce_locate_template($template, $template_name, $template_path)
+function znz_woocommerce_locate_template($template, $template_name, $template_path)
 {
     global $woocommerce;
 
@@ -366,7 +366,7 @@ function ZNZ_woocommerce_locate_template($template, $template_name, $template_pa
         $template_path = $woocommerce->template_url;
     }
 
-    $plugin_path  = ZNZ_plugin_path() . '/woocommerce/';
+    $plugin_path  = znz_plugin_path() . '/woocommerce/';
 
     $template = locate_template(
         array(
@@ -392,7 +392,7 @@ function ZNZ_woocommerce_locate_template($template, $template_name, $template_pa
 
 
 // Add settings link
-function ZNZ_add_plugin_page_settings_link($links)
+function znz_add_plugin_page_settings_link($links)
 {
     $links[] = '<a href="' .
         admin_url('admin.php?page=wc-settings&tab=checkout&section=zenzo_payment') .
@@ -400,4 +400,4 @@ function ZNZ_add_plugin_page_settings_link($links)
     return $links;
 }
 
-add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'ZNZ_add_plugin_page_settings_link');
+add_filter('plugin_action_links_' . plugin_basename(__FILE__), 'znz_add_plugin_page_settings_link');

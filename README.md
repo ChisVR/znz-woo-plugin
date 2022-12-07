@@ -1,6 +1,6 @@
 ## Zenzo Woocommerce Plugin
 
-Accepting Zenzo on your store has several benefits: instant arrival, no chargebacks, and 0 fees. Follow the steps below to install the plugin in your WooCommerce store and start accepting payments in DogeCash.
+Accepting Zenzo on your store has several benefits: instant arrival, no chargebacks, and 0 fees. Follow the steps below to install the plugin in your WooCommerce store and start accepting payments in Zenzo.
 
 ## Install the plugin
 
