@@ -1,11 +1,11 @@
 <?php
 /*
-    Plugin Name: zenzo Payment Gateway for Woocommerce
-    Description: Payment Gateway for zenzo Cryptocurrency
+    Plugin Name: Zenzo Payment Gateway for Woocommerce
+    Description: Payment Gateway for Zenzo Cryptocurrency
     Version: 1.0.0
     Author: ChisVR
     Author URI: https://chisdealhd.co.uk
-    Plugin URI: https://github.com/ChisVR/ZNZ-woo-plugin
+    Plugin URI: https://github.com/ChisVR/znz-woo-plugin
     Developer: ChisVR
 */
 
