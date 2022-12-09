@@ -21,7 +21,7 @@ if (class_exists('WC_Payment_Gateway')) {
             $this->cryptocurrency_used = "ZNZ";
             $this->default_currency_used = get_woocommerce_currency();
             $this->exchange_rate = $this->znz_exchange_rate($this->default_currency_used);
-            $this->plugin_version = "1.0.7";
+            $this->plugin_version = "1.0.0";
 
             // Add support for "Woocommerce subscriptions" plugin
             $this->znz_remove_filter( 'template_redirect', 'maybe_setup_cart', 100 );
